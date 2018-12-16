@@ -14,6 +14,16 @@ async def on_ready():
     await client.change_presence(game=discord.Game(name='type "pls help" for more info'))
     print('bot is ready')
 
+@client.command(pass_context=True)
+async def help(ctx):
+    author = ctx.message.author
+    
+    embed = discord.Embed(
+        colour = discord.Colour.blue()
+    )
+    embed.set_author(name='Help')
+    embed.add_field(name='.ping', value="Returns Pong!", inline=False)
+    await client.send_message(author, embed=embed)
 
 @client.command()
 async def ping():
