@@ -25,6 +25,22 @@ async def help(ctx):
     embed.add_field(name='.ping', value="Returns Pong!", inline=False)
     await client.send_message(author, embed=embed)
 
+@client.command(pass_context=True)
+async def sound(ctx):
+    # discord.opus.load_opus(name)
+    channel = ctx.message.author.voice.voice_channel
+    if channel != None:
+        vc = await client.join_voice_channel(channel)
+        player = vc.create_ffmpeg_player('./assets/clap.mp3')
+        player.start()
+        # print('started')
+        while not player.is_done():
+            await asyncio.sleep(1)
+        player.stop()
+        await vc.disconnect()
+    else:
+        await client.say('Please join a voice channel first!')
+
 @client.command()
 async def ping():
     await client.say('Pong!')
