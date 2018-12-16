@@ -4,7 +4,7 @@ from discord.ext import commands
 from discord.voice_client import VoiceClient
 import asyncio
 
-TOKEN = 'NDg1MjM5ODU2ODM1MDY3OTM1.Dtj5oA.u8Uqk4ZRu-AOO8ohdHvaIUm0DE8'
+TOKEN = #snipped
 
 client = commands.Bot(command_prefix = 'pls ')
 client.remove_command('help')
