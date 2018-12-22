@@ -8,6 +8,7 @@ from discord.ext import commands
 from discord.voice_client import VoiceClient
 import asyncio
 
+
 import config as cfg
 TOKEN = cfg.TOKEN
 
@@ -30,18 +31,19 @@ async def help(ctx):
     embed.add_field(name='.ping', value="Returns Pong!", inline=False)
     await client.send_message(author, embed=embed)
 
-@client.command()
-async def meme():
-    response = requests.get("https://api.reddit.com/r/dankmemes.json?sort=top&t=day&limit=100").json()
-    # print(response["data"]["children"][0]["data"]["title"])
+@client.command(pass_context=True)
+async def meme(ctx):
+    response = requests.get("https://api.reddit.com/r/dankmemes.json?sort=top&t=day&limit=100", headers = {'User-agent': 'test'}).json()
     post = response["data"]["children"][random.randint(1,100)]
-    # print(post["data"]["title"])
-    meme = discord.Embed(
+    embed = discord.Embed(
         title = post["data"]["title"],
-        colour = discord.Colour.blue(),
-        image = "https://testcreative.co.uk/wp-content/uploads/2017/10/Test-Logo-Circle-black-transparent.png"
+        colour = discord.Colour.blue()
     )
-    await client.send_message(ctx.message.channel, embed=meme)
+    embed.set_image(url=post["data"]["url"])
+    embed.set_footer(text='Posted by ' + post["data"]["author_fullname"])
+
+
+    await client.send_message(ctx.message.channel, embed=embed)
 
 @client.command(pass_context=True)
 async def sound(ctx, file):
@@ -71,13 +73,5 @@ async def echo(*args):
         output += word
         output += ' '
     await client.say(output)
-
-# @client.event
-# async def on_message(message):
-#     author = message.author
-#     content = message.content
-#     channel = message.channel
-#     print('{}: {}'.format(author, content))
-#     #await client.send_message(channel, )
 
 client.run(TOKEN)
