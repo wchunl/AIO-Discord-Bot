@@ -48,7 +48,7 @@ async def meme(ctx):
 
 @client.command(pass_context=True)
 async def joke(ctx):
-    response = requests.get("https://www.reddit.com/r/Jokes/top.json?sort=top&t=day&limit=100", headers = {'User-agent': 'test'}).json()
+    response = requests.get("https://api.reddit.com/r/Jokes/top.json?sort=top&t=day&limit=100", headers = {'User-agent': 'test'}).json()
     post = response["data"]["children"][random.randint(1,100)]
     embed = discord.Embed(
         title = post["data"]["title"],
@@ -58,6 +58,29 @@ async def joke(ctx):
     embed.set_footer(text='Posted by ' + post["data"]["author_fullname"])
     await client.send_message(ctx.message.channel, embed=embed)
 
+@client.command(pass_context=True)
+async def shitpost(ctx):
+    response = requests.get("https://api.reddit.com/r/copypasta/top/.json?sort=top&t=week&limit=100", headers = {'User-agent': 'test'}).json()
+    post = response["data"]["children"][random.randint(1,100)]
+    embed = discord.Embed(
+        title = post["data"]["title"],
+        description = post["data"]["selftext"],
+        colour = discord.Colour.blue()
+    )
+    embed.set_footer(text='Posted by ' + post["data"]["author_fullname"])
+    await client.send_message(ctx.message.channel, embed=embed)
+
+@client.command(pass_context=True)
+async def wholesome(ctx):
+    response = requests.get("https://api.reddit.com/r/wholesomememes/top/.json?sort=top&t=week&limit=100", headers = {'User-agent': 'test'}).json()
+    post = response["data"]["children"][random.randint(1,100)]
+    embed = discord.Embed(
+        title = post["data"]["title"],
+        colour = discord.Colour.blue()
+    )
+    embed.set_image(url=post["data"]["url"])
+    embed.set_footer(text='Posted by ' + post["data"]["author_fullname"])
+    await client.send_message(ctx.message.channel, embed=embed)
 #----------------------------------------------------------------------------------#
 
 
