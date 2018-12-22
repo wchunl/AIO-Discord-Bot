@@ -34,58 +34,64 @@ async def help(ctx):
 #####################################################################################
 #####                              REDDIT COMMANDS                              #####
 #####################################################################################
+# Skeleton for embedding reddit posts
+def redditEmbed(url):
+    response = requests.get(url, headers = {'User-agent': 'test'}).json()
+    if response["data"]["dist"] < 100:
+        return discord.Embed(colour = discord.Colour.red(), description = "The subreddit doesn't exist/work!")
+    else:
+        post = response["data"]["children"][random.randint(1,100)]
+        embed = discord.Embed(
+            title = post["data"]["title"],
+            description = post["data"]["selftext"],
+            colour = discord.Colour.blue()
+        )
+        embed.set_image(url=post["data"]["url"])
+        embed.set_footer(text='Posted by ' + post["data"]["author_fullname"])
+        return (embed)
+
+# Quick implemented shortcut commands
 @client.command(pass_context=True)
 async def meme(ctx):
-    response = requests.get("https://api.reddit.com/user/pete7201/m/dankmemenetwork/top.json?sort=top&t=day&limit=100", headers = {'User-agent': 'test'}).json()
-    post = response["data"]["children"][random.randint(1,100)]
-    embed = discord.Embed(
-        title = post["data"]["title"],
-        colour = discord.Colour.blue()
-    )
-    embed.set_image(url=post["data"]["url"])
-    embed.set_footer(text='Posted by ' + post["data"]["author_fullname"])
-    await client.send_message(ctx.message.channel, embed=embed)
+    url = "https://api.reddit.com/user/pete7201/m/dankmemenetwork/top.json?sort=top&t=day&limit=100"
+    await client.send_message(ctx.message.channel, embed=redditEmbed(url))
 
 @client.command(pass_context=True)
 async def joke(ctx):
-    response = requests.get("https://api.reddit.com/r/Jokes/top.json?sort=top&t=day&limit=100", headers = {'User-agent': 'test'}).json()
-    post = response["data"]["children"][random.randint(1,100)]
-    embed = discord.Embed(
-        title = post["data"]["title"],
-        description = post["data"]["selftext"],
-        colour = discord.Colour.blue()
-    )
-    embed.set_footer(text='Posted by ' + post["data"]["author_fullname"])
-    await client.send_message(ctx.message.channel, embed=embed)
+    url = "https://api.reddit.com/r/Jokes/top.json?sort=top&t=day&limit=100"
+    await client.send_message(ctx.message.channel, embed=redditEmbed(url))
 
 @client.command(pass_context=True)
 async def shitpost(ctx):
-    response = requests.get("https://api.reddit.com/r/copypasta/top/.json?sort=top&t=week&limit=100", headers = {'User-agent': 'test'}).json()
-    post = response["data"]["children"][random.randint(1,100)]
-    embed = discord.Embed(
-        title = post["data"]["title"],
-        description = post["data"]["selftext"],
-        colour = discord.Colour.blue()
-    )
-    embed.set_footer(text='Posted by ' + post["data"]["author_fullname"])
-    await client.send_message(ctx.message.channel, embed=embed)
+    url = "https://api.reddit.com/r/copypasta/top/.json?sort=top&t=week&limit=100"
+    await client.send_message(ctx.message.channel, embed=redditEmbed(url))
 
 @client.command(pass_context=True)
 async def wholesome(ctx):
-    response = requests.get("https://api.reddit.com/r/wholesomememes/top/.json?sort=top&t=week&limit=100", headers = {'User-agent': 'test'}).json()
-    post = response["data"]["children"][random.randint(1,100)]
-    embed = discord.Embed(
-        title = post["data"]["title"],
-        colour = discord.Colour.blue()
-    )
-    embed.set_image(url=post["data"]["url"])
-    embed.set_footer(text='Posted by ' + post["data"]["author_fullname"])
-    await client.send_message(ctx.message.channel, embed=embed)
+    url = "https://api.reddit.com/r/wholesomememes/top/.json?sort=top&t=week&limit=100"
+    await client.send_message(ctx.message.channel, embed=redditEmbed(url))
+
+@client.command(pass_context=True)
+async def puns(ctx):
+    url = "https://api.reddit.com/r/puns/top/.json?sort=top&t=week&limit=100"
+    await client.send_message(ctx.message.channel, embed=redditEmbed(url))
+
+# Custom reddit post embedder
+@client.command(pass_context=True)
+async def reddit(ctx, subr = None):
+    if subr == None:
+        await client.send_message(ctx.message.channel, "{} Specify a subreddit bro".format(ctx.message.author.mention))
+    else:
+        url = "https://api.reddit.com/r/" + subr + "/top/.json?sort=top&t=week&limit=100"
+        await client.send_message(ctx.message.channel, embed=redditEmbed(url))
+
 #----------------------------------------------------------------------------------#
 
 
 @client.command(pass_context=True)
-async def sound(ctx, file):
+async def sound(ctx, file = None):
+    if file == None:
+         await client.send_message(ctx.message.channel, "{} Specify a sound bro".format(ctx.message.author.mention))
     if not os.path.exists('./assets/' + file + '.mp3'):
         await client.send_message(ctx.message.channel, "{} That sound doesn't exist bruh".format(ctx.message.author.mention))
     else:
