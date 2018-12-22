@@ -30,7 +30,7 @@ async def help(ctx):
 @client.command(pass_context=True)
 async def sound(ctx, file):
     if not os.path.exists('./assets/' + file + '.mp3'):
-        await client.say("This sound does not exist!")
+        await client.say("{} This sound doesn't exist bruh".format(ctx.message.author.mention))
     else:
         channel = ctx.message.author.voice.voice_channel
         if channel != None:
@@ -42,7 +42,7 @@ async def sound(ctx, file):
             player.stop()
             await vc.disconnect()
         else:
-            await client.say('Join a voice channel fam')
+            await client.say('{} Join a voice channel fam'.format(ctx.message.author.mention))
 
 @client.command()
 async def ping():
