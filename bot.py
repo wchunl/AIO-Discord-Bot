@@ -1,5 +1,8 @@
 import discord
 import os
+import json
+import requests
+import random
 
 from discord.ext import commands
 from discord.voice_client import VoiceClient
@@ -26,6 +29,19 @@ async def help(ctx):
     embed.set_author(name='Help')
     embed.add_field(name='.ping', value="Returns Pong!", inline=False)
     await client.send_message(author, embed=embed)
+
+@client.command()
+async def meme():
+    response = requests.get("https://api.reddit.com/r/dankmemes.json?sort=top&t=day&limit=100").json()
+    # print(response["data"]["children"][0]["data"]["title"])
+    post = response["data"]["children"][random.randint(1,100)]
+    # print(post["data"]["title"])
+    meme = discord.Embed(
+        title = post["data"]["title"],
+        colour = discord.Colour.blue(),
+        image = "https://testcreative.co.uk/wp-content/uploads/2017/10/Test-Logo-Circle-black-transparent.png"
+    )
+    await client.send_message(ctx.message.channel, embed=meme)
 
 @client.command(pass_context=True)
 async def sound(ctx, file):
