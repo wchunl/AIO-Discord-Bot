@@ -31,9 +31,12 @@ async def help(ctx):
     embed.add_field(name='.ping', value="Returns Pong!", inline=False)
     await client.send_message(author, embed=embed)
 
+#####################################################################################
+#####                              REDDIT COMMANDS                              #####
+#####################################################################################
 @client.command(pass_context=True)
 async def meme(ctx):
-    response = requests.get("https://api.reddit.com/r/dankmemes.json?sort=top&t=day&limit=100", headers = {'User-agent': 'test'}).json()
+    response = requests.get("https://api.reddit.com/user/pete7201/m/dankmemenetwork/top.json?sort=top&t=day&limit=100", headers = {'User-agent': 'test'}).json()
     post = response["data"]["children"][random.randint(1,100)]
     embed = discord.Embed(
         title = post["data"]["title"],
@@ -41,14 +44,27 @@ async def meme(ctx):
     )
     embed.set_image(url=post["data"]["url"])
     embed.set_footer(text='Posted by ' + post["data"]["author_fullname"])
-
-
     await client.send_message(ctx.message.channel, embed=embed)
+
+@client.command(pass_context=True)
+async def joke(ctx):
+    response = requests.get("https://www.reddit.com/r/Jokes/top.json?sort=top&t=day&limit=100", headers = {'User-agent': 'test'}).json()
+    post = response["data"]["children"][random.randint(1,100)]
+    embed = discord.Embed(
+        title = post["data"]["title"],
+        description = post["data"]["selftext"],
+        colour = discord.Colour.blue()
+    )
+    embed.set_footer(text='Posted by ' + post["data"]["author_fullname"])
+    await client.send_message(ctx.message.channel, embed=embed)
+
+#----------------------------------------------------------------------------------#
+
 
 @client.command(pass_context=True)
 async def sound(ctx, file):
     if not os.path.exists('./assets/' + file + '.mp3'):
-        await client.say("{} This sound doesn't exist bruh".format(ctx.message.author.mention))
+        await client.send_message(ctx.message.channel, "{} That sound doesn't exist bruh".format(ctx.message.author.mention))
     else:
         channel = ctx.message.author.voice.voice_channel
         if channel != None:
@@ -60,7 +76,7 @@ async def sound(ctx, file):
             player.stop()
             await vc.disconnect()
         else:
-            await client.say('{} Join a voice channel fam'.format(ctx.message.author.mention))
+            await client.send_message(ctx.message.channel, '{} Join a voice channel fam'.format(ctx.message.author.mention))
 
 @client.command()
 async def ping():
