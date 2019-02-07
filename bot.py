@@ -3,7 +3,10 @@ import os
 import json
 import requests
 import random
-
+import glob
+from difflib import SequenceMatcher
+from googletrans import Translator
+from googletrans import LANGUAGES
 from discord.ext import commands
 from discord.voice_client import VoiceClient
 import asyncio
@@ -15,10 +18,20 @@ TOKEN = cfg.TOKEN
 client = commands.Bot(command_prefix = 'pls ')
 client.remove_command('help')
 
+async def reply(ctx, str = None):
+    await client.send_message(ctx.message.channel, "{} ".format(ctx.message.author.mention) + str)
+
 @client.event
 async def on_ready():
     await client.change_presence(game=discord.Game(name='type "pls help" for more info'))
     print('bot is ready')
+
+@client.event
+async def on_message(message):
+    print(message.channel.name)
+    if message.author != client.user and message.channel.name == 'autimatic-text-to-speech':
+        await client.send_message(message.channel, message.content, tts=True)
+    await client.process_commands(message)
 
 @client.command(pass_context=True)
 async def help(ctx):
@@ -80,7 +93,7 @@ async def puns(ctx):
 @client.command(pass_context=True)
 async def reddit(ctx, subr = None):
     if subr == None:
-        await client.send_message(ctx.message.channel, "{} Specify a subreddit bro".format(ctx.message.author.mention))
+        await reply(ctx, "Please specify a subreddit.")
     else:
         url = "https://api.reddit.com/r/" + subr + "/top/.json?sort=top&t=week&limit=100"
         await client.send_message(ctx.message.channel, embed=redditEmbed(url))
@@ -88,12 +101,35 @@ async def reddit(ctx, subr = None):
 #----------------------------------------------------------------------------------#
 
 
+
+@client.command(pass_context=True)
+async def translate(ctx, text = None, target = None):
+    found = False
+    maxim = -1
+    similar = ""
+    for key in LANGUAGES:
+        if target == LANGUAGES[key] or target == key:
+            found = True
+        elif SequenceMatcher(None, LANGUAGES[key], target).ratio() > maxim:
+            similar = LANGUAGES[key]
+            maxim = SequenceMatcher(None, LANGUAGES[key], target).ratio()
+    if found:
+        translation = Translator().translate(text, dest=target)
+        print(translation)
+        await reply(ctx, "`Language detected: " + translation.src + "` \n" + translation.origin + " ` -> ` " + translation.text)
+    else:
+        await reply(ctx, "Language not found, did you mean ***" + similar + "***? For a list of available languages, type `pls help`")
+
+
 @client.command(pass_context=True)
 async def sound(ctx, file = None):
     if file == None:
-         await client.send_message(ctx.message.channel, "{} Specify a sound bro".format(ctx.message.author.mention))
-    if not os.path.exists('./assets/' + file + '.mp3'):
-        await client.send_message(ctx.message.channel, "{} That sound doesn't exist bruh".format(ctx.message.author.mention))
+        await reply(ctx, "Please specify a sound.")
+    elif file == 'list':
+        files = ", ".join(glob.glob("./assets/*.mp3"))
+        await reply(ctx, "Heres all the sounds I found: "+files.replace('./assets/', '').replace('.mp3', ''))
+    elif not os.path.exists('./assets/' + file + '.mp3'):
+        await reply(ctx, "The sound file `" + file + "` does not exist.")
     else:
         channel = ctx.message.author.voice.voice_channel
         if channel != None:
@@ -105,7 +141,7 @@ async def sound(ctx, file = None):
             player.stop()
             await vc.disconnect()
         else:
-            await client.send_message(ctx.message.channel, '{} Join a voice channel fam'.format(ctx.message.author.mention))
+            await reply(ctx, "Join a voice channel first.")
 
 @client.command()
 async def ping():
